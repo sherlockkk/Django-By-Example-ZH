@@ -20,7 +20,7 @@ Django提供了以下帮助函数（functions）来允许你通过一种简单�
 
 模板标签（template tags）必须存在Django的应用中。
 
-进入你的blog应用目录，创建一个新的目录命令为*templatetags*然后在该目录下创建一个空的*__init__.py*文件。接着在该目录下继续创建一个文件命名为*blog_tags.py*。到此，我们的blog应用文件结构应该如下所示：
+进入你的blog应用目录，创建一个新的目录命令为*templatetags*然后在该目录下创建一个空的*\_\_init\_\_.py*文件。接着在该目录下继续创建一个文件命名为*blog_tags.py*。到此，我们的blog应用文件结构应该如下所示：
 
     blog/
         __init__.py
@@ -286,7 +286,19 @@ Django有一个内置的syndication feed框架，你可以用类似的方式（m
 
 在blog应用的目录下创建一个新文件命名为*feeds.py*。添加如下代码：
 
-    from django.contrib.syndication.views import Feed    from django.template.defaultfilters import truncatewords    from .models import Post    class LatestPostsFeed(Feed):        title = 'My blog'        link = '/blog/'        description = 'New posts of my blog.'        def items(self):            return Post.published.all()[:5]        def item_title(self, item):            return item.title        def item_description(self, item):            return truncatewords(item.body, 30)
+    from django.contrib.syndication.views import Feed
+    from django.template.defaultfilters import truncatewords
+    from .models import Post
+    class LatestPostsFeed(Feed):
+        title = 'My blog'
+        link = '/blog/'
+        description = 'New posts of my blog.'
+        def items(self):
+            return Post.published.all()[:5]
+        def item_title(self, item):
+            return item.title
+        def item_description(self, item):
+            return truncatewords(item.body, 30)
 
 首先，我们继承了syndication框架的*Feed*类创建了一个子类。其中的*title，link，description*属性各自对应RSS中的`<title>`,`<link>`,`<description>`元素。
 
@@ -294,11 +306,31 @@ Django有一个内置的syndication feed框架，你可以用类似的方式（m
 
 现在，编辑blog应用下的*urls.py*文件，导入你刚创建的*LatestPostsFeed*，在新的URL模式（pattern）中实例化feed：
 
-    from .feeds import LatestPostsFeed    urlpatterns = [        # ...        url(r'^feed/$', LatestPostsFeed(), name='post_feed'),    ]
+    from .feeds import LatestPostsFeed
+    urlpatterns = [
+        # ...
+        url(r'^feed/$', LatestPostsFeed(), name='post_feed'),
+    ]
     
 在浏览器中转到 http://127.0.0.1:8000/blog/feed/ 。你会看到最新的5个blog帖子的RSS feedincluding：
 
-    <?xml version="1.0" encoding="utf-8"?>    <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">      <channel>        <title>My blog</title>        <link>http://127.0.0.1:8000/blog/</link>        <description>New posts of my blog.</description>        <atom:link href="http://127.0.0.1:8000/blog/feed/" rel="self"/>        <language>en-us</language>        <lastBuildDate>Sun, 20 Sep 2015 20:40:55 -0000</lastBuildDate>        <item>          <title>Who was Django Reinhardt?</title>          <link>http://127.0.0.1:8000/blog/2015/09/20/who-was-django-reinhardt/</link>         <description>The Django web framework was named after the amazing jazz guitarist Django Reinhardt.</description>         <guid>http://127.0.0.1:8000/blog/2015/09/20/who-was-django-reinhardt/</guid>        </item> ...      </channel>    </rss>
+    <?xml version="1.0" encoding="utf-8"?>
+    <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+      <channel>
+        <title>My blog</title>
+        <link>http://127.0.0.1:8000/blog/</link>
+        <description>New posts of my blog.</description>
+        <atom:link href="http://127.0.0.1:8000/blog/feed/" rel="self"/>
+        <language>en-us</language>
+        <lastBuildDate>Sun, 20 Sep 2015 20:40:55 -0000</lastBuildDate>
+        <item>
+          <title>Who was Django Reinhardt?</title>
+          <link>http://127.0.0.1:8000/blog/2015/09/20/who-was-django-reinhardt/</link>
+         <description>The Django web framework was named after the amazing jazz guitarist Django Reinhardt.</description>
+         <guid>http://127.0.0.1:8000/blog/2015/09/20/who-was-django-reinhardt/</guid>
+        </item> ...
+      </channel>
+    </rss>
     
 如果你在一个RSS客户端中打开相同的URL，你会通过一个非常人性化的接口看到你的feed。
 
@@ -323,7 +355,9 @@ Django有一个内置的syndication feed框架，你可以用类似的方式（m
 ###安装Solr
 你需要1.7或更高的Java运行环境来安装Solr。你可以在终端中输入`java -version`来检查你的java版本。下方的输出和你的输出可能有所出入，但是你必须保证安装的版本至少也要是1.7的：
 
-    java version "1.7.0_25"    Java(TM) SE Runtime Environment (build 1.7.0_25-b15)    Java HotSpot(TM) 64-Bit Server VM (build 23.25-b01, mixed mode)
+    java version "1.7.0_25"
+    Java(TM) SE Runtime Environment (build 1.7.0_25-b15)
+    Java HotSpot(TM) 64-Bit Server VM (build 23.25-b01, mixed mode)
     
 如果你没有安装过Java或者版本过低没有达到要求，请到 http://www.oracle.com/technetwork/java/javase/downloads/index.html 下载。
 
@@ -343,15 +377,37 @@ Solr允许你隔离每一个core实例。每个Solr **core**是一个**全文搜
 我们要为我们的blog应用创建一个core。首先，我们需要为我们的core创建文件结构。进入*solr-4.10.4/example/*目录下，创建一个新的目录命名为*blog*。然后在*blog*目录下创建空文件和目录，如下所示：
 
     blog/ 
-        data/        conf/            protwords.txt            schema.xml            solrconfig.xml            stopwords.txt            synonyms.txt            lang/                stopwords_en.txt
+        data/
+        conf/
+            protwords.txt
+            schema.xml
+            solrconfig.xml
+            stopwords.txt
+            synonyms.txt
+            lang/
+                stopwords_en.txt
                 
 在*solrconfig.xml*文件中添加如下XML代码：
 
-    <?xml version="1.0" encoding="utf-8" ?>    <config>     <luceneMatchVersion>LUCENE_36</luceneMatchVersion>     <requestHandler name="/select" class="solr.StandardRequestHandler" default="true" />     <requestHandler name="/update" class="solr.UpdateRequestHandler" />     <requestHandler name="/admin" class="solr.admin.AdminHandlers" />     <requestHandler name="/admin/ping" class="solr.PingRequestHandler">       <lst name="invariants">         <str name="qt">search</str>         <str name="q">*:*</str>       </lst>     </requestHandler>    </config>
+    <?xml version="1.0" encoding="utf-8" ?>
+    <config>
+     <luceneMatchVersion>LUCENE_36</luceneMatchVersion>
+     <requestHandler name="/select" class="solr.StandardRequestHandler" default="true" />
+     <requestHandler name="/update" class="solr.UpdateRequestHandler" />
+     <requestHandler name="/admin" class="solr.admin.AdminHandlers" />
+     <requestHandler name="/admin/ping" class="solr.PingRequestHandler">
+       <lst name="invariants">
+         <str name="qt">search</str>
+         <str name="q">*:*</str>
+       </lst>
+     </requestHandler>
+    </config>
 
 你还可以从本章的示例代码中拷贝该文件。这是一个最小的Solr配置。编辑*schema.xml*文件，加入如下XML代码：
 
-    <?xml version="1.0" ?>    <schema name="default" version="1.5">    </schema>
+    <?xml version="1.0" ?>
+    <schema name="default" version="1.5">
+    </schema>
     
 这是一个空的**架构（schema）**。这个架构（schema）定义了一些字段以及它们的数据类型倍这个搜索引擎编入索引中。我们之后要使用一个定制的架构（schema）。
 
@@ -360,7 +416,11 @@ Solr允许你隔离每一个core实例。每个Solr **core**是一个**全文搜
 
 你需要在表单中填写一下数据
 
-* name: blog* instanceDir: blog* dataDir: data* config: solrconfig.xml* schema: schema.xml
+* name: blog
+* instanceDir: blog
+* dataDir: data
+* config: solrconfig.xml
+* schema: schema.xml
 
 *name*字段是这个core的命名。*instanceDir*字段表明你的core的目录。*dataDir*是被编入索引的数据将要存放的目录。*config*字段是你的*Solr* XML配置文件名。*schema*字段是你的*Solr* XML 数据架构（schema)文件名。
 
@@ -378,19 +438,34 @@ Haystack能和一些搜索引擎后台交互。要使用Solr后端，你还需�
     
 在*django-haystack*和*pysolr*完成安装后，你还需要在你的项目中激活*Haystack*。打开*settings.py*文件在*INSTALLED_APPS*设置中添加*haystack*：
 
-    INSTALLED_APPS = (        # ...        'haystack', 
+    INSTALLED_APPS = (
+        # ...
+        'haystack', 
     )
     
 你还需要为haystack定义搜索引擎后端。为此你要添加一个*HAYSTACK_CONNECTIONS*设置。在*settings.py*文件中添加如下内容：
 
-    HAYSTACK_CONNECTIONS = {        'default': {            'ENGINE': 'haystack.backends.solr_backend.SolrEngine',            'URL': 'http://127.0.0.1:8983/solr/blog'        },    }
+    HAYSTACK_CONNECTIONS = {
+        'default': {
+            'ENGINE': 'haystack.backends.solr_backend.SolrEngine',
+            'URL': 'http://127.0.0.1:8983/solr/blog'
+        },
+    }
     
 要注意URL要指向我们的blog core。到此为止，Haystack已经安装好并且已经为使用Solr做好了准备。
 
 ###创建索引（indexex）
 现在，我们必须将我们想要存储在搜索引擎中的模型进行注册。（models）在Haystack中的惯例是在你的应用中创建一个*search_indexes.py*文件，然后在该文件中注册你的模型（models）。在你的blog应用目录下创建一个新的文件命名为*search_indexes.py*，添加如下代码：
 
-    from haystack import indexes    from .models import Post    class PostIndex(indexes.SearchIndex, indexes.Indexable):        text = indexes.CharField(document=True, use_template=True)        publish = indexes.DateTimeField(model_attr='publish')        def get_model(self):            return Post        def index_queryset(self, using=None):            return self.get_model().published.all()
+    from haystack import indexes
+    from .models import Post
+    class PostIndex(indexes.SearchIndex, indexes.Indexable):
+        text = indexes.CharField(document=True, use_template=True)
+        publish = indexes.DateTimeField(model_attr='publish')
+        def get_model(self):
+            return Post
+        def index_queryset(self, using=None):
+            return self.get_model().published.all()
 
 这是一个为*Post*模型（model）定制的*SearchIndex*。通过这个索引（index），我们告诉Haystack这个模型（model）中的数据必须被搜索引擎编入索引。这个索引（index）是通过继承*indexex.SearchIndex*和*indexex.Indexable*构建的。每一个*SearchIndex*都需要它的一个字段拥有`document=True`。按照惯例，这个字段命名为*text*。这个字段是一个主要的搜索字段。通过使用`use_template=True`，我们告诉Haystack这个字段将会被渲染成一个数据模板（template）来构建document，它会被搜索引擎编入索引（index）。*publish*字段是一个日期字段也会被编入索引。我们通过*model_attr*参数来表明这个字段对应*Post*模型（model）的*publish*字段。这个字段会被编入索引包含被编入索引的*Post*对象的*publish*字段的内容。
 
@@ -398,15 +473,22 @@ Haystack能和一些搜索引擎后台交互。要使用Solr后端，你还需�
 
 现在，在blog应用的模板（templates）目录下创建目录和文件*search/indexes/blog/post_text.txt*，然后添加如下代码：
 
-    {{ object.title }}    {{ object.tags.all|join:", " }}    {{ object.body }}
+    {{ object.title }}
+    {{ object.tags.all|join:", " }}
+    {{ object.body }}
     
 这是document模板（template）的默认路径，是给索引中的*text*字段使用的。Haystack使用应用名和模型（model）名来动态构建这个路径。每一次我们要对一个对象进行索引，Haystack都会基于这个模板（template）构建一个document，并且之后在Solr的搜索引擎中对这个document进行索引。
 
 现在，我们已经有了一个定制的搜索索引（index），我们需要创建合适的Solr架构（schema）。Solr的配置基于XML，所以我们必须为我们即将编入索引（index）的数据生成一个XML架构（schema）。非常幸运（Fortunately），haystack提供了一个方法可以动态的生成架构（schema），基于我们的搜索索引（indexes）。打开终端，输入以下命令：
 
-    python manage.py build_solr_schema你会看到一个XML的输出内容。如果你看下生成的XML代码的地步，你会看到Haystack为你的*PostIndex*动态生成了字段：
+    python manage.py build_solr_schema
 
-    <field name="text" type="text_en" indexed="true" stored="true"     multiValued="false" />    <field name="publish" type="date" indexed="true" stored="true"     multiValued="false" />
+你会看到一个XML的输出内容。如果你看下生成的XML代码的地步，你会看到Haystack为你的*PostIndex*动态生成了字段：
+
+    <field name="text" type="text_en" indexed="true" stored="true"
+     multiValued="false" />
+    <field name="publish" type="date" indexed="true" stored="true"
+     multiValued="false" />
      
 从`<?xml version="1.0" ？>`开始拷贝所有输出的XML内容直到最后的标签（tag）`</schema>`，需要包含所有的标签（tags）。
 
@@ -424,19 +506,30 @@ Haystack能和一些搜索引擎后台交互。要使用Solr后端，你还需�
     
 你会看到如下警告：
 
-    WARNING: This will irreparably remove EVERYTHING from your search    index in connection 'default'.    Your choices after this are to restore from backups or rebuild via the    ‘rebuild_index’ command.
+    WARNING: This will irreparably remove EVERYTHING from your search
+    index in connection 'default'.
+    Your choices after this are to restore from backups or rebuild via the
+    ‘rebuild_index’ command.
     Are you sure you wish to continue? [y/N]
     
 输入y。Haystack将会整理搜索索引并且插入所有的发布状态的blog帖子中。你会看到如下输出：
 
-    Removing all documents from your index because you said so.    All documents removed.    Indexing 4 posts
+    Removing all documents from your index because you said so.
+    All documents removed.
+    Indexing 4 posts
     
 在浏览器中打开 http://127.0.0.1:8983/solr/#/blog 。在**Statistics*下方，你会看到有多少个documents被编入索引（indexed），如下所示：
 ![django-3-13](http://ohqrvqrlb.bkt.clouddn.com/django-3-13.png)
 
 现在，在浏览器中打开 http://127.0.0.1:8983/solr/#/blog/query 。这是一个Solr提供的查询接口。点击*Execute query*按钮。默认的会请求在你的core中所有被编入索引（indexde）的documents。你会看到一串带有这个查询结果的*JSON*输出。输出的documents如下所示：
 
-    {       "id": "blog.post.1",       "text": "Who was Django Reinhardt?\njazz, music\nThe Django web framework was named after the amazing jazz guitarist Django Reinhardt.",       "django_id": "1",       "publish": "2015-09-20T12:49:52Z",       "django_ct": "blog.post"    },
+    {
+       "id": "blog.post.1",
+       "text": "Who was Django Reinhardt?\njazz, music\nThe Django web framework was named after the amazing jazz guitarist Django Reinhardt.",
+       "django_id": "1",
+       "publish": "2015-09-20T12:49:52Z",
+       "django_ct": "blog.post"
+    },
     
 这是每个帖子在搜索索引（index）中存储的数据。*text*字段包含了标题，通过逗号分隔的标签（tags），还有帖子的内容，这个字段是在我们之前定义的模板（template）上构建的。
 
@@ -445,20 +538,57 @@ Haystack能和一些搜索引擎后台交互。要使用Solr后端，你还需�
 ###创建一个搜索视图（view）
 现在，我们要开始创建一个定制视图（view）来允许我们的用户搜索帖子。首先，我们需要一个搜索表单（form）。编辑blog应用下的*forms.py*文件，加入以下代码：
 
-    class SearchForm(forms.Form):        query = forms.CharField()
+    class SearchForm(forms.Form):
+        query = forms.CharField()
 
 我们会使用*query*来让用户引入搜索条件（terms）。编辑blog应用下的*views.py*文件，加入以下代码：
 
-    from .forms import EmailPostForm, CommentForm, SearchForm    from haystack.query import SearchQuerySet    def post_search(request):        form = SearchForm()        if 'query' in request.GET:            form = SearchForm(request.GET)            if form.is_valid():
-                cd = form.cleaned_data                results = SearchQuerySet().models(Post)\                             .filter(content=cd['query']).load_all()                # count total results                total_results = results.count()        return render(request,                     'blog/post/search.html',                     {'form': form,                      'cd': cd,                      'results': results,                      'total_results': total_results})
+    from .forms import EmailPostForm, CommentForm, SearchForm
+    from haystack.query import SearchQuerySet
+    def post_search(request):
+        form = SearchForm()
+        if 'query' in request.GET:
+            form = SearchForm(request.GET)
+            if form.is_valid():
+                cd = form.cleaned_data
+                results = SearchQuerySet().models(Post)\
+                             .filter(content=cd['query']).load_all()
+                # count total results
+                total_results = results.count()
+        return render(request,
+                     'blog/post/search.html',
+                     {'form': form,
+                      'cd': cd,
+                      'results': results,
+                      'total_results': total_results})
                       
 在这个视图（view）中，我们首先实例化了我们刚才创建的*SearchForm*.我们准备使用*GET*方法来提交这个表单（form），这样可以使URL结果中包含查询的参数。假设这个表单（form）已经被提交，我们将在*request.GET*字典中查找*query*参数。当表单（form）被提交后，我们通过提交的*GET*数据来实例化它，然后我们要检查传入的数据是否有效（valid）。如果这个表单是有效（valid）的，我们使用*SearchQuerySet*针对所有被编入索引的并且主要内容中包含给予的查询内容的*Post*对象来执行一次搜索。*load_all()*方法会立刻加载所有在数据库中有关联的*Post*对象。通过这个方法，我们使用数据库对象填充搜索结果，避开了每次迭代存取数据对象的时候对每一个对象都进行存取（译者注：这话不太好翻译，看不懂的话可以看下原文）。最后，我们在*total_results*变量中存储返回结果的总数然后传递本地的变量为上下文(context)来渲染一个模板（template）。
 
 搜索视图（view）已经准备好了。我们还需要创建一个模板（template）来展示表单（form）和用户执行搜索后返回的结果。在*templates/blog/post/*目录下创建一个新的文件命名为*search.html*，添加如下代码：
 
-    {% extends "blog/base.html" %}        {% block title %}Search{% endblock %}        {% block content %}        {% if "query" in request.GET %}        <h1>Posts containing "{{ cd.query }}"</h1>        <h3>Found {{ total_results }} result{{ total_results|pluralize }}</h3>        {% for result in results %}         {% with post=result.object %}           <h4><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h4>           {{ post.body|truncatewords:5 }}         {% endwith %}
+    {% extends "blog/base.html" %}
+        {% block title %}Search{% endblock %}
+        {% block content %}
+        {% if "query" in request.GET %}
+        <h1>Posts containing "{{ cd.query }}"</h1>
+        <h3>Found {{ total_results }} result{{ total_results|pluralize }}</h3>
+        {% for result in results %}
+         {% with post=result.object %}
+           <h4><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h4>
+           {{ post.body|truncatewords:5 }}
+         {% endwith %}
          {% empty %}
-           <p>There are no results for your query.</p>        {% endfor %}           <p><a href="{% url "blog:post_search" %}">Search again</a></p>        {% else %}           <h1>Search for posts</h1>           <form action="." method="get">           {{ form.as_p }}           <input type="submit" value="Search">           </form>        {% endif %}    {% endblock %}
+           <p>There are no results for your query.</p>
+        {% endfor %}
+           <p><a href="{% url "blog:post_search" %}">Search again</a></p>
+        {% else %}
+           <h1>Search for posts</h1>
+           <form action="." method="get">
+           {{ form.as_p }}
+           <input type="submit" value="Search">
+           </form>
+        {% endif %}
+    {% endblock %}
 
 就像在搜索视图（view）中，我们做了区分如果这个表单（form）是基于*query*参数存在的情况下提交。在这个post提交前，我们展示了这个表单和一个提交按钮。当这个post被提交，我们就展示查询的操作结果，包含返回结果的总数和结果列。每一个结果都是Solr和Haystack封装处理后返回的document。我们需要使用*result.object*来存取真实的有关联的*Post*对象在这个结果中。
 
